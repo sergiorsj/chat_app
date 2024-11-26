@@ -5,6 +5,7 @@ import { useState } from 'react';
 const Start = ({ navigation }) => {
     const [name, setName] = useState("")
     const [colors, setColors] = useState(["#090C08", "#474056", "#8A95A5", "#B9C6AE"]);
+    const [selectedColor, setselectedColor] =  useState("")
  return (
    <View style={styles.container}>
     <ImageBackground style={styles.image} source={imageBackground} resizeMode="cover">
@@ -26,7 +27,7 @@ const Start = ({ navigation }) => {
                margin: "10",
                backgroundColor: c
             };
-            return  (<TouchableOpacity key={i} style={color}>
+            return  (<TouchableOpacity key={i} style={color} onPress={() => setselectedColor(c)}>
              </TouchableOpacity>
         )
       })
@@ -35,6 +36,7 @@ const Start = ({ navigation }) => {
     </View>
     <TouchableOpacity style={styles.buttonStartChatting} onPress={() => navigation.navigate('Chat', {
       name,
+      color: selectedColor
     })}>
           <Text  style={{
       color: "white"
