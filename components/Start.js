@@ -41,11 +41,10 @@ const styles = StyleSheet.create({
    alignItems: 'center'
  },
  containerWhite: {
-    flex: 1,
     width: "88%",
-    height: "44%",
+    height: "33%",
     backgroundColor: "white",
-    bottom: 0,
+    marginBottom: "20%",
     justifyContent: 'center',
     alignItems: 'center'
   },
@@ -60,8 +59,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#757083",
     borderRadius: 8,
     paddingVertical: 10,
-    paddingHorizontal: 10,
-    marginTop: 10
+    paddingHorizontal: 20,
+    marginTop: 10,
+    width: "90%"
  },
  text: {
     padding: "25%",
