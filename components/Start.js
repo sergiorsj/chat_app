@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 const Start = ({ navigation }) => {
     const [name, setname] = useState("")
+    const [colors, setColors] = useState(["#090C08", "#474056", "#8A95A5", "#B9C6AE"]);
  return (
    <View style={styles.container}>
     <ImageBackground style={styles.image} source={imageBackground} resizeMode="cover">
@@ -17,10 +18,20 @@ const Start = ({ navigation }) => {
        placeholder='Your Name'
      /></View>
    <Text>Choose Background Color:</Text>
-   <View>
-   <TouchableOpacity style={styles.colorbutton}>
-          <Text>Press Here</Text>
-        </TouchableOpacity>
+   <View style={{flexDirection: "row", padding: "10"}}>
+      {
+         colors.map(c => {
+            const color = {
+               ...styles.colorbutton,
+               margin: "10",
+               backgroundColor: c
+            };
+            return  (<TouchableOpacity style={color}>
+             </TouchableOpacity>
+        )
+      })
+         
+      }
     </View>
     <TouchableOpacity style={styles.buttonStartChatting} onPress={() => navigation.navigate('Chat')}>
           <Text  style={{
@@ -96,7 +107,9 @@ const styles = StyleSheet.create({
     fontWeight: "300"
  },
  colorbutton: {
-    borderRadius: 20
+    borderRadius: 20,
+   width: "40",
+   height: "40"
  },
  colorbuttoncontainer: {
     flexDirection: "row",
