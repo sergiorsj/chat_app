@@ -6,7 +6,7 @@ export default function Chat({route}) {
   const { name } = route.params;
   return (
     <View>
-      <Text>
+      <Text style={{fontSize: "32"}}>
       Welcome, {name}
       </Text>
      </View>
