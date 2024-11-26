@@ -5,7 +5,7 @@ export default function Chat({route}) {
   console.log(route)
   const { name, color } = route.params;
   return (
-    <View style={{backgroundColor: `${color}`, height: 100}}>
+    <View style={{backgroundColor: `${color}`, height: 900}}>
       <Text style={{fontSize: "32"}}>
       Welcome, {name}
       </Text>
