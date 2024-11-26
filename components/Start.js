@@ -16,17 +16,17 @@ const Start = ({ navigation }) => {
        onChangeText={setname}
        placeholder='Your Name'
      /></View>
-   <Text style={styles.text1}>Choose Background Color:</Text>
+   <Text>Choose Background Color:</Text>
    <View>
    <TouchableOpacity style={styles.colorbutton}>
           <Text>Press Here</Text>
         </TouchableOpacity>
     </View>
-     <Button style={styles.buttonStartChatting}
-       title="Start Chatting"
-       color="#ffffff"
-       onPress={() => navigation.navigate('Chat')}
-     />
+    <TouchableOpacity style={styles.buttonStartChatting} onPress={() => navigation.navigate('Chat')}>
+          <Text  style={{
+      color: "white"
+   }}>Start Chatting</Text>
+        </TouchableOpacity>
      </View>
      </ImageBackground>
 
@@ -58,10 +58,12 @@ const styles = StyleSheet.create({
  buttonStartChatting: {
     backgroundColor: "#757083",
     borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginTop: 10,
-    width: "90%"
+    marginTop: 20,
+    width: "90%",
+    height: "20%",
+    alignItems: "center",
+    justifyContent: "center"
+    
  },
  text: {
     padding: "25%",
