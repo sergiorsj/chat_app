@@ -3,7 +3,7 @@ import imageBackground  from "../images/BackgroundImage.png";
 import { useState } from 'react';
 
 const Start = ({ navigation }) => {
-    const [name, setname] = useState("")
+    const [name, setName] = useState("")
     const [colors, setColors] = useState(["#090C08", "#474056", "#8A95A5", "#B9C6AE"]);
  return (
    <View style={styles.container}>
@@ -14,26 +14,28 @@ const Start = ({ navigation }) => {
         <TextInput
         style={styles.input}
        value={name}
-       onChangeText={setname}
+       onChangeText={setName}
        placeholder='Your Name'
      /></View>
    <Text>Choose Background Color:</Text>
    <View style={{flexDirection: "row", padding: "10"}}>
       {
-         colors.map(c => {
+         colors.map((c, i) => {
             const color = {
                ...styles.colorbutton,
                margin: "10",
                backgroundColor: c
             };
-            return  (<TouchableOpacity style={color}>
+            return  (<TouchableOpacity key={i} style={color}>
              </TouchableOpacity>
         )
       })
          
       }
     </View>
-    <TouchableOpacity style={styles.buttonStartChatting} onPress={() => navigation.navigate('Chat')}>
+    <TouchableOpacity style={styles.buttonStartChatting} onPress={() => navigation.navigate('Chat', {
+      name,
+    })}>
           <Text  style={{
       color: "white"
    }}>Start Chatting</Text>

@@ -17,8 +17,11 @@ export default function App() {
         />
         <Stack.Screen
           name="Chat"
-          component={Chat}
-        />
+        >
+          {
+            (props) => <Chat {...props} />
+          }
+          </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
   );

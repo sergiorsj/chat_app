@@ -1,8 +1,14 @@
 import React from 'react'
-import { View } from 'react-native'
+import { Text, View } from 'react-native'
 
-export default function Chat() {
+export default function Chat({route}) {
+  console.log(route)
+  const { name } = route.params;
   return (
-    <View>Chat</View>
+    <View>
+      <Text>
+      Welcome, {name}
+      </Text>
+     </View>
   )
 }
