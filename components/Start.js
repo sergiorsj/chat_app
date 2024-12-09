@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, Button, ImageBackground, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, Button, ImageBackground, TextInput, TouchableOpacity, Platform } from 'react-native';
 import imageBackground  from "../images/BackgroundImage.png";
 import { useState } from 'react';
 
@@ -44,6 +44,7 @@ const Start = ({ navigation }) => {
         </TouchableOpacity>
      </View>
      </ImageBackground>
+     { Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null }
 
    </View>
  );
