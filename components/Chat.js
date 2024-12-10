@@ -1,6 +1,11 @@
-import React from 'react'
-import { Platform, Text, View } from 'react-native'
-import { GiftedChat } from "react-native-gifted-chat";
+import React, { useState, useEffect } from "react";
+import {
+  StyleSheet,
+  View,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { Bubble, GiftedChat } from "react-native-gifted-chat";
 
 export default function Chat({route}) {
   console.log(route)
