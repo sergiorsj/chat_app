@@ -1,126 +1,156 @@
-import { StyleSheet, View, Text, Button, ImageBackground, TextInput, TouchableOpacity, Platform } from 'react-native';
-import imageBackground  from "../images/BackgroundImage.png";
 import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 
 const Start = ({ navigation }) => {
-    const [name, setName] = useState("")
-    const [colors, setColors] = useState(["#090C08", "#474056", "#8A95A5", "#B9C6AE"]);
-    const [selectedColor, setselectedColor] =  useState("")
- return (
-   <View style={styles.container}>
-    <ImageBackground style={styles.image} source={imageBackground} resizeMode="cover">
-    <Text style={styles.text}>Chat App!</Text>
-    <View style={styles.containerWhite}>
-        <View style={styles.inputContainer}> 
-        <TextInput
-        style={styles.input}
-       value={name}
-       onChangeText={setName}
-       placeholder='Your Name'
-     /></View>
-   <Text>Choose Background Color:</Text>
-   <View style={{flexDirection: "row", padding: "10"}}>
-      {
-         colors.map((c, i) => {
-            const color = {
-               ...styles.colorbutton,
-               margin: "10",
-               backgroundColor: c
-            };
-            return  (<TouchableOpacity key={i} style={color} onPress={() => setselectedColor(c)}>
-             </TouchableOpacity>
-        )
-      })
-         
-      }
-    </View>
-    <TouchableOpacity style={styles.buttonStartChatting} onPress={() => navigation.navigate('Chat', {
-      name,
-      color: selectedColor
-    })}>
-          <Text  style={{
-      color: "white"
-   }}>Start Chatting</Text>
-        </TouchableOpacity>
-     </View>
-     </ImageBackground>
-     { Platformn.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null }
+  const [name, setName] = useState(""); // State for user input
+  const [backgroundColor, setBackgroundColor] = useState("#090C08"); // Default background color
 
-   </View>
- );
-}
+  // Array of background color options
+  const colors = ["#090C08", "#474056", "#8A95A5", "#B9C6AE"];
 
+  return (
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <View style={styles.container}>
+        {/* Background Image */}
+        <ImageBackground
+          source={require("../images/BackgroundImage.png")} // Direct require method
+          style={styles.background}
+        >
+          <View style={styles.contentContainer}>
+            {/* App Title */}
+            <Text style={styles.title}>Welcome to ChatApp!</Text>
+
+            {/* Input and Options Container */}
+            <View style={styles.inputContainer}>
+              {/* TextInput for entering the user's name */}
+              <TextInput
+                style={styles.textInput}
+                value={name}
+                onChangeText={setName}
+                placeholder="Enter Your Name"
+                placeholderTextColor="#757083"
+              />
+
+              {/* Color Selection Options */}
+              <Text style={styles.colorText}>Choose Background Color:</Text>
+              <View style={styles.colorContainer}>
+                {colors.map((color) => (
+                  <TouchableOpacity
+                    key={color}
+                    style={[
+                      styles.colorOption,
+                      { backgroundColor: color },
+                      backgroundColor === color && styles.selectedColor, // Highlight selected color
+                    ]}
+                    onPress={() => setBackgroundColor(color)} // Update selected color
+                  />
+                ))}
+              </View>
+
+              {/* Start Chatting Button */}
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() =>
+                  navigation.navigate("Chat", {
+                    name: name || "User", // Default name if empty
+                    backgroundColor, // Pass selected color to Chat screen
+                  })
+                }
+              >
+                <Text style={styles.buttonText}>Start Chatting</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ImageBackground>
+      </View>
+    </KeyboardAvoidingView>
+  );
+};
+
+/* Stylesheet for Start Component */
 const styles = StyleSheet.create({
- container: {
-   flex: 1,
-   justifyContent: 'center',
-   alignItems: 'center'
- },
- containerWhite: {
-    width: "88%",
-    height: "33%",
-    backgroundColor: "white",
-    marginBottom: "20%",
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
- image: {
+  container: {
     flex: 1,
-    width: "100%",
-    height: "100%",
-    justifyContent: 'center',
-   alignItems: 'center'
- },
- buttonStartChatting: {
-    backgroundColor: "#757083",
-    borderRadius: 8,
-    marginTop: 20,
-    width: "90%",
-    height: "20%",
+  },
+  background: {
+    flex: 1,
+    resizeMode: "cover",
+    justifyContent: "center",
+  },
+  contentContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
     alignItems: "center",
-    justifyContent: "center"
-    
- },
- text: {
-    padding: "25%",
-    flex: 6,
+    paddingBottom: "20%",
+  },
+  title: {
     fontSize: 45,
-    color: "white",
-    fontWeight: "600"
- },
- text1: {
-    color: "#757083",
+    fontWeight: "600",
+    color: "#FFFFFF",
+    marginBottom: 40,
+  },
+  inputContainer: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    width: "88%",
+    alignItems: "center",
+  },
+  textInput: {
+    width: "100%",
+    padding: 15,
+    borderWidth: 1,
+    borderColor: "#757083",
+    marginBottom: 20,
     fontSize: 16,
     fontWeight: "300",
-    marginTop: 20
- },
- inputContainer : {
-    flexDirection: "row",
-   alignItems: 'center',
-   borderColor: "#757083",
-   borderWidth: 2,
-   padding: 18, 
-   marginLeft: 20, 
-   marginRight: 20,
-   marginTop: -10,
-   marginBottom: 10
- },
- input: {
-    flex: 1,
-    marginLeft: 10,
+    color: "#757083",
+    opacity: 0.5,
+  },
+  colorText: {
     fontSize: 16,
-    fontWeight: "300"
- },
- colorbutton: {
-    borderRadius: 20,
-   width: "40",
-   height: "40"
- },
- colorbuttoncontainer: {
+    fontWeight: "300",
+    color: "#757083",
+    marginBottom: 10,
+  },
+  colorContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    margin: 20
- }
+    width: "80%",
+    marginBottom: 20,
+  },
+  colorOption: {
+    width: 50,
+    height: 50,
+    borderRadius: 25, // Makes the button circular
+  },
+  selectedColor: {
+    borderWidth: 2,
+    borderColor: "#757083", // Highlights selected color
+  },
+  button: {
+    backgroundColor: "#757083",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
 });
 
 export default Start;
