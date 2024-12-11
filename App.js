@@ -20,27 +20,27 @@ const App = () => {
   messagingSenderId: "999843738259",
   appId: "1:999843738259:web:5d46f0974556e070e41366",
   measurementId: "G-53JV80Z5Q7"
-};
+  };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
 
-// Initialize Cloud Firestore and get a reference to the service
-const db = getFirestore(app);
+  // Initialize Cloud Firestore and get a reference to the service
+  const db = getFirestore(app);
 
-return (
-  <NavigationContainer>
-    <Stack.Navigator
-      initialRouteName="ShoppingLists"
-    >
-      <Stack.Screen
-        name="ShoppingLists"
+  return (
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName="ShoppingLists"
       >
-        {props => <ShoppingLists db={db} {...props} />}
-      </Stack.Screen>
-    </Stack.Navigator>
-  </NavigationContainer>
-);
+        <Stack.Screen
+          name="ShoppingLists"
+        >
+          {props => <ShoppingLists db={db} {...props} />}
+        </Stack.Screen>
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 
 }
 
