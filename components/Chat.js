@@ -1,109 +1,159 @@
-import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  View,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
-import { Bubble, GiftedChat } from "react-native-gifted-chat";
+import { collection, addDoc, onSnapshot, query, where, orderBy } from "firebase/firestore";
+import { useEffect, useState } from 'react';
+import { StyleSheet, View, Text, KeyboardAvoidingView, Platform} from 'react-native';
 
-/* 
- * Chat Component
- * Displays the user's name in the navigation bar and sets the background
- * color of the screen based on the selection made in the Start screen.
- */
-const Chat = ({ route, navigation }) => {
-  // Destructure parameters passed from Start screen
-  const { name, backgroundColor } = route.params;
+import { Bubble, GiftedChat, InputToolbar } from "react-native-gifted-chat";
 
-  // Messages state
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import CustomActions from './CustomActions';
+import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
+import MapView from 'react-native-maps';
+
+
+const Chat = ({ route, navigation, db, isConnected, storage }) => {
+  const { name , background, userID } = route.params;
   const [messages, setMessages] = useState([]);
 
-  /* 
-   * useEffect Hook
-   * Initializes a default message when the component mounts
-   */
+  //sets name as name typed by user on mainscreen and sets background as user selected background
   useEffect(() => {
-    navigation.setOptions({ title: name || "Chat" }); // Fallback title if name is empty
+    navigation.setOptions({ title: name, color: background });
+  }, []);
+  
 
-    // Set default messages
-    setMessages([
-      {
-        _id: 1,
-        text: "Hello developer",
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: "React Native",
-          avatar: "https://placeimg.com/140/140/any",
-        },
-      },
-      {
-        _id: 2,
-        text: "This is a system message",
-        createdAt: new Date(),
-        system: true,
-      },
-    ]);
-  }, [name, navigation]);
+  
+  let unsubMessages;
 
-  /* 
-   * Function to handle sending messages
-   */
-  const onSend = (newMessages = []) => {
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, newMessages)
-    );
-  };
+  useEffect(() => {
 
-  /* 
-   * Function to customize message bubble colors
-   */
+    if (isConnected === true) {
+
+      // unregister current onSnapshot() listener to avoid registering multiple listeners when
+      // useEffect code is re-executed.
+      if (unsubMessages) unsubMessages();
+      unsubMessages = null;
+
+    const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
+    unsubMessages = onSnapshot(q, (docs) => {
+      let newMessages = [];
+      docs.forEach(doc => {
+        newMessages.push({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: new Date(doc.data().createdAt.toMillis())
+        })
+      })
+      cacheMessages(newMessages);
+      setMessages(newMessages);
+    });
+  } else loadCachedMessages();
+
+
+    return () => {
+      if (unsubMessages) unsubMessages();
+    }
+   }, [isConnected]);
+
+
+
+   const cacheMessages = async (messagesToCache) => {
+    try {
+      await AsyncStorage.setItem('messages', JSON.stringify(messagesToCache));
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  const loadCachedMessages = async () => {
+    const cachedMessages = await AsyncStorage.getItem("messages") || [];
+    setMessages(JSON.parse(cachedMessages));
+  }
+
+  const onSend = (newMessages) => {
+    addDoc(collection(db, "messages"), newMessages[0])
+  }
+
   const renderBubble = (props) => {
-    return (
-      <Bubble
-        {...props}
-        wrapperStyle={{
-          right: {
-            backgroundColor: "#000", // Sender's bubble
-          },
-          left: {
-            backgroundColor: "#FFF", // Receiver's bubble
-          },
-        }}
-      />
-    );
+    return <Bubble
+      {...props}
+      wrapperStyle={{
+        right: {
+          backgroundColor: "#000"
+        },
+        left: {
+          backgroundColor: "#FFF"
+        }
+      }}
+    />
+  }
+
+  const renderInputToolbar = (props) => {
+    if (isConnected) return <InputToolbar {...props} />;
+    else return null;
+   }
+
+   const renderCustomActions = (props) => {
+    return <CustomActions storage={storage} {...props} />;
   };
 
-  /* 
-   * Render
-   * Display the Gifted Chat interface with the current messages and onSend handler.
-   */
-  return (
-    <View style={[styles.container, { backgroundColor: backgroundColor || "#FFFFFF" }]}>
-      <GiftedChat
-        messages={messages}
-        renderBubble={renderBubble} // Pass custom bubble renderer
-        onSend={(messages) => onSend(messages)}
-        user={{
-          _id: 1, // The current user's ID
-        }}
-      />
-      {Platform.OS === "android" ? <KeyboardAvoidingView behavior="height" /> : null}
-      {Platform.OS === "ios" ? <KeyboardAvoidingView behavior="padding" /> : null}
-    </View>
-  );
-};
+  const renderCustomView = (props) => {
+    const { currentMessage} = props;
+    if (currentMessage.location) {
+      return (
+          <MapView
+            style={{width: 150,
+              height: 100,
+              borderRadius: 13,
+              margin: 3}}
+            region={{
+              latitude: currentMessage.location.latitude,
+              longitude: currentMessage.location.longitude,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}
+          />
+      );
+    }
+    return null;
+  }
 
-/* 
- * Styles
- * Define the layout and styling for the Chat screen elements.
- * - container: Sets up the background color and full-screen layout.
- */
+
+  return (
+    <View style={[styles.mcontainer, {backgroundColor: background}]}>
+    <GiftedChat
+      messages={messages}
+      renderBubble={renderBubble}
+      renderInputToolbar={renderInputToolbar}
+      renderActions={renderCustomActions}
+      renderCustomView={renderCustomView}
+      onSend={messages => onSend(messages)}
+      user={{
+        _id: userID,
+        name: name
+    }}
+    />
+    { Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null }
+    {Platform.OS === "ios"?<KeyboardAvoidingView behavior="padding" />: null}
+    </View>
+  )
+//  return (
+//    <View style={[styles.container,
+//    {backgroundColor: background}]}>
+//      <Text>Hello {name}!</Text>
+//    </View>
+//  );
+}
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1, // Ensures the container takes up the full screen
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
+  mcontainer: {
+    flex: 1
+  }
 });
 
 export default Chat;
