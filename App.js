@@ -1,49 +1,30 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
-// Create the navigator
-const stack = createNativeStackNavigator();
-
 import Start from './components/Start';
 import Chat from './components/Chat';
 
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+const Stack = createNativeStackNavigator();
 
-// import the screens
-import ShoppingLists from './components/ShoppingLists';
-
-const App = () => {
-  const firebaseConfig = {
-    apiKey: "AIzaSyBIvraaC5MRprYFymcoZjZpEGpNwakzwNg",
-  authDomain: "chatapp-2436a.firebaseapp.com",
-  projectId: "chatapp-2436a",
-  storageBucket: "chatapp-2436a.firebasestorage.app",
-  messagingSenderId: "999843738259",
-  appId: "1:999843738259:web:5d46f0974556e070e41366",
-  measurementId: "G-53JV80Z5Q7"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-// Initialize Cloud Firestore and get a reference to the service
-const db = getFirestore(app);
-
-return (
-  <NavigationContainer>
-    <Stack.Navigator
-      initialRouteName="ShoppingLists"
-    >
-      <Stack.Screen
-        name="ShoppingLists"
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName="Start"
       >
-        {props => <ShoppingLists db={db} {...props} />}
-      </Stack.Screen>
-    </Stack.Navigator>
-  </NavigationContainer>
-);
-
+        <Stack.Screen
+          name="Start"
+          component={Start}
+        />
+        <Stack.Screen
+          name="Chat"
+        >
+          {
+            (props) => <Chat {...props} />
+          }
+          </Stack.Screen>
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 }
 
-export default App;
+
