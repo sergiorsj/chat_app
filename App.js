@@ -45,7 +45,7 @@ export default function App() {
           name="Chat"
         >
           {
-            (props) => <ShoppingLists db={db}  {...props} />}
+            (props) => <Chat db={db}  {...props} />}
           </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
