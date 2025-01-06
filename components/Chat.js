@@ -1,108 +1,141 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { GiftedChat, Bubble, InputToolbar } from "react-native-gifted-chat";
+import {
+  getDoc,
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+} from "firebase/firestore";
 import {
   StyleSheet,
   View,
+  Text,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { Bubble, GiftedChat } from "react-native-gifted-chat";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import CustomActions from "./CustomActions";
+import MapView from "react-native-maps";
 
-/* 
- * Chat Component
- * Displays the user's name in the navigation bar and sets the background
- * color of the screen based on the selection made in the Start screen.
- */
-const Chat = ({ route, navigation }) => {
-  // Destructure parameters passed from Start screen
-  const { name, backgroundColor } = route.params;
-
-  // Messages state
+const Chat = ({ route, navigation, db, isConnected, storage }) => {
   const [messages, setMessages] = useState([]);
+  const { name, backgroundColor, userID } = route.params;
 
-  /* 
-   * useEffect Hook
-   * Initializes a default message when the component mounts
-   */
-  useEffect(() => {
-    navigation.setOptions({ title: name || "Chat" }); // Fallback title if name is empty
-
-    // Set default messages
-    setMessages([
-      {
-        _id: 1,
-        text: "Hello developer",
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: "React Native",
-          avatar: "https://placeimg.com/140/140/any",
-        },
-      },
-      {
-        _id: 2,
-        text: "This is a system message",
-        createdAt: new Date(),
-        system: true,
-      },
-    ]);
-  }, [name, navigation]);
-
-  /* 
-   * Function to handle sending messages
-   */
-  const onSend = (newMessages = []) => {
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, newMessages)
-    );
+  const onSend = (newMessages) => {
+    addDoc(collection(db, "messages"), newMessages[0]);
   };
 
-  /* 
-   * Function to customize message bubble colors
-   */
+  const renderInputToolbar = (props) => {
+    if (isConnected) return <InputToolbar {...props} />;
+    else return null;
+  };
+
+  const renderCustomActions = (props) => {
+    return <CustomActions userID={userID} storage={storage} {...props} />;
+  };
+
+  const renderCustomView = (props) => {
+    const { currentMessage } = props;
+    if (currentMessage.location) {
+      return (
+        <MapView
+          style={{ width: 150, height: 100, borderRadius: 13, margin: 3 }}
+          region={{
+            latitude: currentMessage.location.latitude,
+            longitude: currentMessage.location.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+        />
+      );
+    }
+    return null;
+  };
+
   const renderBubble = (props) => {
     return (
       <Bubble
         {...props}
         wrapperStyle={{
           right: {
-            backgroundColor: "#000", // Sender's bubble
+            backgroundColor: "#000",
           },
           left: {
-            backgroundColor: "#FFF", // Receiver's bubble
+            backgroundColor: "#FFF",
           },
         }}
       />
     );
   };
 
-  /* 
-   * Render
-   * Display the Gifted Chat interface with the current messages and onSend handler.
-   */
+  useEffect(() => {
+    navigation.setOptions({ title: name });
+
+    let unsubMessages;
+    if (isConnected === true) {
+      if (unsubMessages) unsubMessages();
+      unsubMessages = null;
+
+      const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
+      unsubMessages = onSnapshot(q, (documentsSnapshot) => {
+        let newMessages = [];
+        documentsSnapshot.forEach((doc) => {
+          newMessages.push({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: new Date(doc.data().createdAt.toMillis()),
+          });
+        });
+        cacheMessages(newMessages);
+        setMessages(newMessages);
+      });
+    } else loadCachedMessages();
+
+    // Clean up code
+    return () => {
+      if (unsubMessages) unsubMessages();
+    };
+  }, [isConnected]);
+
+  const cacheMessages = async (messagesToCache) => {
+    try {
+      await AsyncStorage.setItem("messages", JSON.stringify(messagesToCache));
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const loadCachedMessages = async () => {
+    const loadCachedMessages = (await AsyncStorage.getItem("messages")) || [];
+    setMessages(JSON.parse(cachedMessages));
+  };
+
   return (
-    <View style={[styles.container, { backgroundColor: backgroundColor || "#FFFFFF" }]}>
+    <View style={[styles.container, { backgroundColor: backgroundColor }]}>
       <GiftedChat
         messages={messages}
-        renderBubble={renderBubble} // Pass custom bubble renderer
+        renderBubble={renderBubble}
+        renderInputToolbar={renderInputToolbar}
         onSend={(messages) => onSend(messages)}
+        renderActions={renderCustomActions}
+        renderCustomView={renderCustomView}
         user={{
-          _id: 1, // The current user's ID
+          _id: userID,
+          name: name,
         }}
       />
-      {Platform.OS === "android" ? <KeyboardAvoidingView behavior="height" /> : null}
-      {Platform.OS === "ios" ? <KeyboardAvoidingView behavior="padding" /> : null}
+      {Platform.OS === "android" ? (
+        <KeyboardAvoidingView behavior="height" />
+      ) : null}
     </View>
   );
 };
 
-/* 
- * Styles
- * Define the layout and styling for the Chat screen elements.
- * - container: Sets up the background color and full-screen layout.
- */
 const styles = StyleSheet.create({
   container: {
-    flex: 1, // Ensures the container takes up the full screen
+    flex: 1,
   },
 });
 
